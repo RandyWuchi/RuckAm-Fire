@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import {
   Keyboard,
   KeyboardAvoidingView,
@@ -21,6 +21,7 @@ import {
   SubmitButton,
 } from '../components/Forms';
 import Colors from '../constants/Colors';
+import { FirebaseContext } from '../contexts/FirebaseContext';
 import { categories } from '../data/Categories';
 
 const validationSchema = Yup.object().shape({
@@ -34,10 +35,22 @@ const validationSchema = Yup.object().shape({
 const ListingEditScreen = () => {
   const colorScheme = useColorScheme();
   const [loading, setLoading] = useState(false);
+  const firebase = useContext(FirebaseContext);
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (
+    { title, price, description, category, images },
+    { resetForm }
+  ) => {
     setLoading(true);
 
+    const listing = { title, price, description, category, images };
+
+    try {
+      await firebase.createListing(listing);
+    } catch (error) {
+      console.log('Error uploading listing', error);
+    }
+    resetForm();
     setLoading(false);
   };
   return (
@@ -59,7 +72,9 @@ const ListingEditScreen = () => {
               category: null,
               images: [],
             }}
-            onSubmit={handleSubmit}
+            onSubmit={(values, { resetForm }) =>
+              handleSubmit(values, { resetForm })
+            }
             validationSchema={validationSchema}
           >
             <FormImagePicker name='images' />

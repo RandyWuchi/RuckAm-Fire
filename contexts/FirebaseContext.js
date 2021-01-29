@@ -44,6 +44,33 @@ const Firebase = {
     }
   },
 
+  createListing: async (listing) => {
+    try {
+      const images = listing.images;
+      let imagesUrl = [];
+      imagesUrl = await Promise.all(
+        images.map((image) => Firebase.upLoadListingImage(image))
+      );
+
+      const uid = Firebase.getCurrentUser().uid;
+
+      const userInfo = await Firebase.getUserInfo(uid);
+
+      await db.collection('listings').doc().set({
+        title: listing.title,
+        price: listing.price,
+        description: listing.description,
+        category: listing.category,
+        images: imagesUrl,
+        username: userInfo.username,
+        email: userInfo.email,
+        profilePhotoUrl: userInfo.profilePhotoUrl,
+      });
+    } catch (error) {
+      console.log('Error @createListing:', error);
+    }
+  },
+
   upLoadImage: async (uri) => {
     const uid = Firebase.getCurrentUser().uid;
 
@@ -62,6 +89,22 @@ const Firebase = {
       return url;
     } catch (error) {
       console.log('Error @upLoadImage:', error);
+    }
+  },
+
+  upLoadListingImage: async (uri) => {
+    const uid = Firebase.getCurrentUser().uid;
+    try {
+      const photo = await Firebase.getBlob(uri);
+
+      const imageRef = firebase.storage().ref('listingPhotos').child(uid);
+      await imageRef.put(photo);
+
+      const url = await imageRef.getDownloadURL();
+
+      return url;
+    } catch (error) {
+      console.log('Error @upLoadListingImage:', error);
     }
   },
 
