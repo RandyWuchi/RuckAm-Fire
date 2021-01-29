@@ -1,8 +1,9 @@
 import { useNavigation } from '@react-navigation/native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
 
 import Card from '../components/Card';
+import { db } from '../contexts/FirebaseContext';
 import routes from '../navigation/routes';
 
 const ListingScreen = () => {
@@ -10,7 +11,24 @@ const ListingScreen = () => {
   const [listings, setListings] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
 
-  const fetchListing = () => {};
+  const fetchListing = () => {
+    setRefreshing(true);
+    db.collection('listings').onSnapshot((snapshot) =>
+      setListings(
+        snapshot.docs.map((doc) => ({
+          id: doc.id,
+          data: doc.data(),
+        }))
+      )
+    );
+    setRefreshing(false);
+  };
+
+  useEffect(() => {
+    const unsubscribe = fetchListing();
+
+    return unsubscribe;
+  }, []);
 
   return (
     <View style={styles.screen}>
@@ -22,9 +40,9 @@ const ListingScreen = () => {
         renderItem={({ item }) => (
           <View style={{ padding: 20 }}>
             <Card
-              title={item.title}
-              subTitle={'$' + item.price}
-              image={item.images}
+              title={item.data.title}
+              subTitle={'$' + item.data.price}
+              image={item.data.images[0]}
               onPress={() => navigation.navigate(routes.LISTING_DETAILS, item)}
             />
           </View>

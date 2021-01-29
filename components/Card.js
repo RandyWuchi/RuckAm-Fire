@@ -20,7 +20,7 @@ const Card = ({ title, subTitle, image, onPress }) => {
           { backgroundColor: Colors[colorScheme].background },
         ]}
       >
-        <Image style={styles.image} source={image} />
+        <Image style={styles.image} source={{ uri: image }} />
         <View style={styles.detailsContainer}>
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.subTitle}>{subTitle}</Text>

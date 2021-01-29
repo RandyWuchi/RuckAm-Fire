@@ -163,4 +163,4 @@ const FirebaseProvider = ({ children }) => {
   );
 };
 
-export { FirebaseContext, FirebaseProvider };
+export { FirebaseContext, FirebaseProvider, db };
